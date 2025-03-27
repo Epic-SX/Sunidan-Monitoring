@@ -4,7 +4,6 @@ Flask-WTF
 Flask-CORS
 Werkzeug
 selenium
-webdriver-manager
 requests
 beautifulsoup4
 python-dotenv
@@ -13,5 +12,9 @@ schedule
 SQLAlchemy
 typing_extensions
 lxml
-line_bot_sdk
 flask_sqlalchemy
+dotenv
+flask_cors
+sqlalchemy
+webdriver_manager
+bs4

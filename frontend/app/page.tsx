@@ -110,7 +110,7 @@ export default function Home() {
         <>
           <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
             <Typography variant="body2" color="text.secondary">
-              {products.length} products being monitored
+              {products.length}つの製品が監視されています
             </Typography>
             <Button 
               variant="contained" 

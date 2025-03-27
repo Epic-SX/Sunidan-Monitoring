@@ -18,85 +18,85 @@ def register_routes(app, db):
     def handle_options(path):
         return '', 200
     
-    @app.route('/products')
-    def product_list():
-        """Product list page"""
-        products = Product.query.all()
-        return products
+    # @app.route('/api/products')
+    # def product_list():
+    #     """Product list page"""
+    #     products = Product.query.all()
+    #     return products
     
-    @app.route('/products/add', methods=['GET', 'POST'])
-    def add_product():
-        """Add product page"""
-        if request.method == 'POST':
-            url = request.form.get('url')
+    # @app.route('/api/products/add', methods=['GET', 'POST'])
+    # def add_product():
+    #     """Add product page"""
+    #     if request.method == 'POST':
+    #         url = request.form.get('url')
             
-            # Check if product already exists
-            existing_product = Product.query.filter_by(url=url).first()
-            if existing_product:
-                flash('この商品は既に追加されています', 'warning')
-                return redirect(url_for('product_list'))
+    #         # Check if product already exists
+    #         existing_product = Product.query.filter_by(url=url).first()
+    #         if existing_product:
+    #             flash('この商品は既に追加されています', 'warning')
+    #             return redirect(url_for('product_list'))
             
-            try:
-                # Get product info from Snidan
-                username = SnidanSettings.query.first().username
-                password = SnidanSettings.query.first().password
-                driver = setup_driver()
-                product_info = get_product_info(driver, url, username, password)
+    #         try:
+    #             # Get product info from Snidan
+    #             username = SnidanSettings.query.first().username
+    #             password = SnidanSettings.query.first().password
+    #             driver = setup_driver()
+    #             product_info = get_product_info(driver, url, username, password)
                 
-                if not product_info:
-                    flash('商品情報の取得に失敗しました。URLが正しいか、スニダンにログインしているか確認してください。', 'danger')
-                    return redirect(url_for('add_product'))
+    #             if not product_info:
+    #                 flash('商品情報の取得に失敗しました。URLが正しいか、スニダンにログインしているか確認してください。', 'danger')
+    #                 return redirect(url_for('add_product'))
                 
-                # Create new product
-                product = Product(
-                    url=url,
-                    name=product_info['name'],
-                    image_url=product_info['image_url'],
-                    added_at=datetime.datetime.now(),
-                    is_active=True
-                )
-                db.session.add(product)
-                db.session.flush()  # Get product ID
+    #             # Create new product
+    #             product = Product(
+    #                 url=url,
+    #                 name=product_info['name'],
+    #                 image_url=product_info['image_url'],
+    #                 added_at=datetime.datetime.now(),
+    #                 is_active=True
+    #             )
+    #             db.session.add(product)
+    #             db.session.flush()  # Get product ID
                 
-                # Add sizes
-                for size_info in product_info['sizes']:
-                    size = Size(
-                        product_id=product.id,
-                        size=size_info['size'],
-                        current_price=size_info['price'],
-                        previous_price=size_info['price'],
-                        lowest_price=size_info['price'],
-                        highest_price=size_info['price'],
-                        last_updated=datetime.datetime.now()
-                    )
-                    db.session.add(size)
+    #             # Add sizes
+    #             for size_info in product_info['sizes']:
+    #                 size = Size(
+    #                     product_id=product.id,
+    #                     size=size_info['size'],
+    #                     current_price=size_info['price'],
+    #                     previous_price=size_info['price'],
+    #                     lowest_price=size_info['price'],
+    #                     highest_price=size_info['price'],
+    #                     last_updated=datetime.datetime.now()
+    #                 )
+    #                 db.session.add(size)
                     
-                    # Add initial price history
-                    price_history = PriceHistory(
-                        size_id=size.id,
-                        price=size_info['price'],
-                        timestamp=datetime.datetime.now()
-                    )
-                    db.session.add(price_history)
+    #                 # Add initial price history
+    #                 price_history = PriceHistory(
+    #                     size_id=size.id,
+    #                     price=size_info['price'],
+    #                     timestamp=datetime.datetime.now()
+    #                 )
+    #                 db.session.add(price_history)
                 
-                db.session.commit()
-                flash('商品を追加しました', 'success')
-                return redirect(url_for('product_list'))
+    #             db.session.commit()
+    #             flash('商品を追加しました', 'success')
+    #             return redirect(url_for('product_list'))
             
-            except Exception as e:
-                db.session.rollback()
-                flash(f'エラーが発生しました: {str(e)}', 'danger')
-                return redirect(url_for('add_product'))
+    #         except Exception as e:
+    #             db.session.rollback()
+    #             flash(f'エラーが発生しました: {str(e)}', 'danger')
+    #             return redirect(url_for('add_product'))
         
-        return render_template('add_product.html')
+    #     return render_template('add_product.html')
     
-    @app.route('/products/<int:product_id>')
-    def product_detail(product_id):
-        """Product detail page"""
-        product = Product.query.get_or_404(product_id)
-        return render_template('product_detail.html', product=product)
+    # @app.route('/api/products/<int:product_id>')
+    # def product_detail(product_id):
+    #     """Product detail page"""
+    #     product = Product.query.get_or_404(product_id)
+    #     return render_template('product_detail.html', product=product)
     
-    @app.route('/products/<int:product_id>/edit', methods=['GET'])
+    @app.route('/api/products/<int:product_id>/edit', methods=['GET'])
     def get_edit_product(product_id):
         """Edit product page"""
         product = Product.query.get_or_404(product_id)
@@ -148,7 +148,7 @@ def register_routes(app, db):
             return jsonify({'error': str(e)}), 400
     
     
-    @app.route('/products/<int:product_id>/delete', methods=['POST'])
+    @app.route('/api/products/<int:product_id>/delete', methods=['POST'])
     def delete_product(product_id):
         """Delete product"""
         product = Product.query.get_or_404(product_id)
@@ -163,7 +163,7 @@ def register_routes(app, db):
         
         return redirect(url_for('product_list'))
     
-    @app.route('/products/<int:product_id>/history')
+    @app.route('/api/products/<int:product_id>/history')
     def product_history(product_id):
         """Product price history page"""
         product = Product.query.get_or_404(product_id)
@@ -202,7 +202,7 @@ def register_routes(app, db):
             db.session.rollback()
             return jsonify({'error': str(e)}), 400
     
-    @app.route('/notifications')
+    @app.route('/api/notifications')
     def notification_history():
         """Notification history page"""
         notifications = NotificationHistory.query.order_by(NotificationHistory.timestamp.desc()).limit(100).all()

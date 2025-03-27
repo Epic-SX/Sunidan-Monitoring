@@ -2,7 +2,7 @@
 
 // API base URL - using Next.js proxy to avoid CORS issues
 const API_BASE_URL = '/api';
-
+const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
 // Generic fetch function with error handling
 async function fetchFromAPI(endpoint: string, options: RequestInit = {}) {
   try {

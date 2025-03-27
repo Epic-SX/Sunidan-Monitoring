@@ -3,8 +3,10 @@ import datetime
 import json
 from flask import render_template, request, redirect, url_for, flash, jsonify
 from models import Product, Size, PriceHistory, NotificationHistory, Settings, NotificationSettings, SnidanSettings
-from scraper import get_product_info
+from scraper import get_product_info, setup_driver
 import logging
+import scraper
+import monitor
 
 logger = logging.getLogger(__name__)
 
@@ -20,7 +22,7 @@ def register_routes(app, db):
     def product_list():
         """Product list page"""
         products = Product.query.all()
-        return render_template('product_list.html', products=products)
+        return products
     
     @app.route('/products/add', methods=['GET', 'POST'])
     def add_product():
@@ -36,7 +38,10 @@ def register_routes(app, db):
             
             try:
                 # Get product info from Snidan
-                product_info = get_product_info(url)
+                username = SnidanSettings.query.first().username
+                password = SnidanSettings.query.first().password
+                driver = setup_driver()
+                product_info = get_product_info(driver, url, username, password)
                 
                 if not product_info:
                     flash('商品情報の取得に失敗しました。URLが正しいか、スニダンにログインしているか確認してください。', 'danger')
@@ -91,8 +96,8 @@ def register_routes(app, db):
         product = Product.query.get_or_404(product_id)
         return render_template('product_detail.html', product=product)
     
-    @app.route('/products/<int:product_id>/edit', methods=['GET', 'POST'])
-    def edit_product(product_id):
+    @app.route('/products/<int:product_id>/edit', methods=['GET'])
+    def get_edit_product(product_id):
         """Edit product page"""
         product = Product.query.get_or_404(product_id)
         
@@ -113,6 +118,35 @@ def register_routes(app, db):
             return redirect(url_for('product_list'))
         
         return render_template('edit_product.html', product=product)
+    
+    @app.route('/api/products/<int:product_id>/edit', methods=['POST'])
+    def edit_product(product_id):
+        """Edit product API endpoint"""
+        product = Product.query.get_or_404(product_id)
+        
+        try:
+            data = request.get_json()  # Get JSON data instead of form data
+            
+            # Update product status
+            product.is_active = data.get('is_active', False)
+            
+            # Update size notification settings
+            received_sizes = {size['id']: size for size in data.get('sizes', [])}
+            
+            for size in product.sizes:
+                if size.id in received_sizes:
+                    size_data = received_sizes[size.id]
+                    size.notify_below = size_data.get('notify_below')
+                    size.notify_above = size_data.get('notify_above')
+                    size.notify_on_any_change = size_data.get('notify_on_any_change', False)
+            
+            db.session.commit()
+            return jsonify({'message': '商品設定を更新しました'}), 200
+            
+        except Exception as e:
+            db.session.rollback()
+            return jsonify({'error': str(e)}), 400
+    
     
     @app.route('/products/<int:product_id>/delete', methods=['POST'])
     def delete_product(product_id):
@@ -145,44 +179,28 @@ def register_routes(app, db):
         
         return render_template('product_history.html', product=product, history_data=json.dumps(history_data))
     
-    @app.route('/settings/notification', methods=['GET', 'POST'])
-    def notification_settings():
-        """Notification settings page"""
-        settings = NotificationSettings.query.first()
-        
-        if request.method == 'POST':
-            settings.line_enabled = 'line_enabled' in request.form
-            settings.line_token = request.form.get('line_token')
-            settings.line_user_id = request.form.get('line_user_id')
-            
-            settings.discord_enabled = 'discord_enabled' in request.form
-            settings.discord_webhook = request.form.get('discord_webhook')
-            
-            settings.chatwork_enabled = 'chatwork_enabled' in request.form
-            settings.chatwork_token = request.form.get('chatwork_token')
-            settings.chatwork_room_id = request.form.get('chatwork_room_id')
-            
-            db.session.commit()
-            flash('通知設定を更新しました', 'success')
-            return redirect(url_for('notification_settings'))
-        
-        return render_template('notification_settings.html', settings=settings)
-    
-    @app.route('/settings/snidan', methods=['GET', 'POST'])
-    def snidan_settings():
-        """Snidan settings page"""
+    @app.route('/api/settings/snidan', methods=['GET'])
+    def get_snidan_settings():
+        """Get Snidan settings page"""
+        settings = SnidanSettings.query.first()
+        return render_template('snidan_settings.html', settings=settings)
+
+    @app.route('/api/settings/snidan', methods=['POST'])
+    def update_snidan_settings():
+        """Update Snidan settings page"""
         settings = SnidanSettings.query.first()
         
-        if request.method == 'POST':
-            settings.username = request.form.get('username')
-            settings.password = request.form.get('password')
-            settings.monitoring_interval = int(request.form.get('monitoring_interval', 10))
+        try:
+            data = request.get_json()  # Get JSON data instead of form data
+            settings.username = data.get('username', settings.username)
+            settings.password = data.get('password', settings.password)
+            settings.monitoring_interval = int(data.get('monitoring_interval', 10))
             
             db.session.commit()
-            flash('スニダン設定を更新しました', 'success')
-            return redirect(url_for('snidan_settings'))
-        
-        return render_template('snidan_settings.html', settings=settings)
+            return jsonify({'message': 'スニダン設定を更新しました'}), 200
+        except Exception as e:
+            db.session.rollback()
+            return jsonify({'error': str(e)}), 400
     
     @app.route('/notifications')
     def notification_history():
@@ -199,8 +217,13 @@ def register_routes(app, db):
     @app.route('/api/products/<int:product_id>')
     def api_product(product_id):
         """API endpoint for a single product"""
-        product = Product.query.get_or_404(product_id)
-        return jsonify(product.to_dict())
+        try:
+            product = Product.query.get_or_404(product_id)
+            if product:
+                product.sizes = Size.query.filter_by(product_id=product_id).all()
+            return jsonify(product.to_dict()), 200  # Explicitly return 200 OK status
+        except Exception as e:
+            return jsonify({'error': str(e)}), 500  # Handle unexpected errors gracefully
     
     @app.route('/api/products/<int:product_id>/history')
     def api_product_history(product_id):
@@ -236,12 +259,15 @@ def register_routes(app, db):
         try:
             # Get Snidan settings
             snidan_settings = SnidanSettings.query.first()
-            if not snidan_settings or not snidan_settings.username or not snidan_settings.password:
-                return jsonify({'error': 'Snidan credentials are not configured. Please set them up in the settings.'}), 400
+            if not snidan_settings:
+                logger.error("Snidan settings not found in the database.")
+                return jsonify({'error': 'Snidan settings not found.'}), 404
             
             # Get product info from Snidan
             try:
-                product_info = get_product_info(url, snidan_settings.username, snidan_settings.password)
+                driver = setup_driver()
+                product_info = get_product_info(driver, url, snidan_settings.username, snidan_settings.password)
+                driver.quit()
             except Exception as scraper_error:
                 logger.error(f"Error scraping product info: {str(scraper_error)}")
                 # For testing/development, create a mock product
@@ -258,7 +284,8 @@ def register_routes(app, db):
                     }
                 else:
                     return jsonify({'error': f'Failed to scrape product information: {str(scraper_error)}'}), 500
-            
+                driver.quit()
+                
             if not product_info:
                 return jsonify({'error': 'Failed to get product information. Check the URL and make sure you are logged into Snidan.'}), 400
             
@@ -321,40 +348,73 @@ def register_routes(app, db):
             db.session.rollback()
             return jsonify({'error': str(e)}), 500
     
-    @app.route('/api/notifications/settings', methods=['GET', 'POST'])
-    def api_notification_settings():
-        """API endpoint for notification settings"""
-        if request.method == 'GET':
-            # Get all notification settings
-            settings = {}
-            for setting in NotificationSettings.query.all():
-                settings[setting.service] = {
-                    'enabled': setting.enabled,
-                    'token': setting.token,
-                    'user_id': setting.user_id
-                }
-            return jsonify(settings)
-        else:
-            # Update notification settings
-            data = request.json
+    @app.route('/api/notifications/settings', methods=['GET'])
+    def get_notification_settings():
+        """API endpoint for getting notification settings"""
+        try:
+            setting = NotificationSettings.query.first()
+            if setting:
+                # Convert the setting object to a dictionary
+                return jsonify({
+                    'line_enabled': setting.line_enabled,
+                    'line_token': setting.line_token,
+                    'line_user_id': setting.line_user_id,
+                    'discord_enabled': setting.discord_enabled,
+                    'discord_webhook': setting.discord_webhook,
+                    'chatwork_enabled': setting.chatwork_enabled,
+                    'chatwork_token': setting.chatwork_token,
+                    'chatwork_room_id': setting.chatwork_room_id
+                }), 200
+            else:
+                return jsonify({
+                    'line_enabled': False,
+                    'line_token': '',
+                    'line_user_id': '',
+                    'discord_enabled': False,
+                    'discord_webhook': '',
+                    'chatwork_enabled': False,
+                    'chatwork_token': '',
+                    'chatwork_room_id': ''
+                }), 200
+        except Exception as e:
+            logger.error(f"Error getting notificationSetting: {str(e)}")
+            return jsonify({
+                'line_enabled': False,
+                'line_token': '',
+                'line_user_id': '',
+                'discord_enabled': False,
+                'discord_webhook': '',
+                'chatwork_enabled': False,
+                'chatwork_token': '',
+                'chatwork_room_id': ''
+            }), 500
+
+    @app.route('/api/notifications/settings', methods=['POST'])
+    def update_notification_settings():
+        """API endpoint for updating notification settings"""
+        data = request.json
+        
+        try:
+            settings = NotificationSettings.query.first()
+            if not settings:
+                # Insert new settings if none exist
+                settings = NotificationSettings()
+                db.session.add(settings)
             
-            try:
-                for service, settings in data.items():
-                    setting = NotificationSettings.query.filter_by(service=service).first()
-                    
-                    if not setting:
-                        setting = NotificationSettings(service=service)
-                        db.session.add(setting)
-                    
-                    setting.enabled = settings.get('enabled', False)
-                    setting.token = settings.get('token', '')
-                    setting.user_id = settings.get('user_id', '')
-                
-                db.session.commit()
-                return jsonify({'success': True}), 200
-            except Exception as e:
-                db.session.rollback()
-                return jsonify({'error': str(e)}), 500
+            settings.line_enabled = data.get('line_enabled', settings.line_enabled)
+            settings.line_token = data.get('line_token', settings.line_token)
+            settings.line_user_id = data.get('line_user_id', settings.line_user_id)
+            settings.discord_enabled = data.get('discord_enabled', settings.discord_enabled)
+            settings.discord_webhook = data.get('discord_webhook', settings.discord_webhook)
+            settings.chatwork_enabled = data.get('chatwork_enabled', settings.chatwork_enabled)
+            settings.chatwork_token = data.get('chatwork_token', settings.chatwork_token)
+            settings.chatwork_room_id = data.get('chatwork_room_id', settings.chatwork_room_id)
+            
+            db.session.commit()
+            return jsonify({'success': True}), 200
+        except Exception as e:
+            db.session.rollback()
+            return jsonify({'error': str(e)}), 500
     
     @app.route('/api/snidan/settings', methods=['GET', 'POST'])
     def api_snidan_settings():
@@ -418,3 +478,38 @@ def register_routes(app, db):
             'notification_count': notification_count,
             'monitoring_active': True  # This should be updated to reflect the actual status
         }) 
+    
+    @app.route('/api/system/loginstatus')
+    def api_system_loginstatus():
+        """API endpoint for system loginstatus"""
+        # Get last startup time
+        login_info = SnidanSettings.query.first()
+        username = login_info.username
+        password = login_info.password
+        driver = scraper.setup_driver()
+        login_res = scraper.login_to_snidan(driver, username, password)
+        driver.quit()
+        if login_res:
+            return jsonify({'success': 'ログインに成功しました。'}), 200
+        else:
+            return jsonify({'error' : 'ログインに失敗しました。'}), 503
+        
+    @app.route('/api/system/monitoring')
+    def api_system_toggleMonitor():
+        """API endpoint for system loginstatus"""
+        # Get last startup time
+        active = request.json.active
+        if active:
+            monitor.start_monitoring()
+        else:
+            monitor.stop_monitoring()
+        login_info = SnidanSettings.query.first()
+        username = login_info.username
+        password = login_info.password
+        driver = scraper.setup_driver()
+        login_res = scraper.login_to_snidan(driver, username, password)
+        driver.quit()
+        if login_res:
+            return jsonify({'success': 'ログインに成功しました。'}), 200
+        else:
+            return jsonify({'error' : 'ログインに失敗しました。'}), 503

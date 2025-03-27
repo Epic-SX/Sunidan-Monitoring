@@ -40,24 +40,25 @@ const mockProducts = [
 // It will proxy the request to the Flask backend
 export async function GET() {
   try {
-    // Use the Next.js proxy to avoid CORS issues
-    const response = await fetch('http://localhost:5000/api/products', {
+    const API_URL = process.env.BACKEND_URL || 'http://localhost:5000';
+    const response = await fetch(`${API_URL}/api/products`, {
       headers: {
         'Content-Type': 'application/json',
       },
-      // This is important for CORS
       cache: 'no-store',
     });
-    
+
     if (!response.ok) {
-      throw new Error(`API error: ${response.status}`);
+      const errorData = await response.text();
+      console.error(`API error (${response.status}):`, errorData);
+      throw new Error(`APIリクエストは${response.status}ステータスで失敗しました。`);
     }
     
     const products = await response.json();
     return NextResponse.json(products);
   } catch (error) {
-    console.error('Failed to fetch products from backend:', error);
-    // Return mock data as fallback for development
+    console.error('商品の取得に失敗しました:', error);
+    // return NextResponse.json({ error: 'Failed to fetch products' }, { status: 500 });
     return NextResponse.json(mockProducts);
   }
 }
@@ -85,7 +86,7 @@ export async function POST(request: Request) {
     const result = await response.json();
     return NextResponse.json(result);
   } catch (error) {
-    console.error('Failed to add product:', error);
+    console.error('製品の追加に失敗しました:', error);
     return NextResponse.json(
       { success: false, message: 'エラーが発生しました: ' + (error as Error).message },
       { status: 500 }

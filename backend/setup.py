@@ -16,7 +16,7 @@ logging.basicConfig(
 logger = logging.getLogger("setup")
 
 # Create data directory if it doesn't exist
-data_dir = Path("data")
+data_dir = Path("backend/data")
 data_dir.mkdir(exist_ok=True)
 
 # Database file path

@@ -1,0 +1,58 @@
+2025-03-25 08:00:14,405 - snidan_monitor - INFO - Monitoring thread started
+2025-03-25 08:00:14,409 - snidan_monitor - INFO - Starting monitoring process
+2025-03-25 08:00:14,409 - snidan_monitor - INFO - Database not found, running setup
+2025-03-25 08:00:14,414 - snidan_monitor - ERROR - Snidan settings not configured
+2025-03-25 08:00:14,420 - setup - INFO - Initializing database
+2025-03-25 08:00:14,494 - setup - INFO - Default settings added
+2025-03-25 08:00:14,495 - setup - INFO - Default notification settings added
+2025-03-25 08:00:14,496 - setup - INFO - Default Snidan settings added
+2025-03-25 08:00:14,504 - setup - INFO - Database initialized successfully
+2025-03-25 08:00:14,505 - snidan_monitor - INFO - Starting Snidan Price Monitor
+2025-03-25 08:00:14,538 - werkzeug - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on http://127.0.0.1:5000
+2025-03-25 08:00:14,538 - werkzeug - INFO - [33mPress CTRL+C to quit[0m
+2025-03-25 08:07:11,439 - werkzeug - INFO - 127.0.0.1 - - [25/Mar/2025 08:07:11] "[32mGET / HTTP/1.1[0m" 302 -
+2025-03-25 08:07:11,480 - werkzeug - INFO - 127.0.0.1 - - [25/Mar/2025 08:07:11] "[35m[1mGET /products HTTP/1.1[0m" 500 -
+2025-03-25 08:07:11,552 - werkzeug - INFO - 127.0.0.1 - - [25/Mar/2025 08:07:11] "[36mGET /products?__debugger__=yes&cmd=resource&f=style.css HTTP/1.1[0m" 304 -
+2025-03-25 08:07:11,554 - werkzeug - INFO - 127.0.0.1 - - [25/Mar/2025 08:07:11] "[36mGET /products?__debugger__=yes&cmd=resource&f=debugger.js HTTP/1.1[0m" 304 -
+2025-03-25 08:07:11,607 - werkzeug - INFO - 127.0.0.1 - - [25/Mar/2025 08:07:11] "GET /products?__debugger__=yes&cmd=resource&f=console.png&s=teAjkxF7DAio0Q02gmBN HTTP/1.1" 200 -
+2025-03-25 08:43:28,819 - werkzeug - INFO - 127.0.0.1 - - [25/Mar/2025 08:43:28] "[35m[1mGET /products HTTP/1.1[0m" 500 -
+2025-03-25 08:43:28,851 - werkzeug - INFO - 127.0.0.1 - - [25/Mar/2025 08:43:28] "[36mGET /products?__debugger__=yes&cmd=resource&f=style.css HTTP/1.1[0m" 304 -
+2025-03-25 08:43:28,860 - werkzeug - INFO - 127.0.0.1 - - [25/Mar/2025 08:43:28] "[36mGET /products?__debugger__=yes&cmd=resource&f=debugger.js HTTP/1.1[0m" 304 -
+2025-03-25 08:43:28,885 - werkzeug - INFO - 127.0.0.1 - - [25/Mar/2025 08:43:28] "[36mGET /products?__debugger__=yes&cmd=resource&f=console.png&s=teAjkxF7DAio0Q02gmBN HTTP/1.1[0m" 304 -
+2025-03-25 08:43:28,908 - werkzeug - INFO - 127.0.0.1 - - [25/Mar/2025 08:43:28] "[36mGET /products?__debugger__=yes&cmd=resource&f=console.png HTTP/1.1[0m" 304 -
+2025-03-25 09:09:19,517 - werkzeug - INFO - 127.0.0.1 - - [25/Mar/2025 09:09:19] "[31m[1mPOST /api/products/add HTTP/1.1[0m" 400 -
+2025-03-25 09:28:52,205 - werkzeug - INFO - 127.0.0.1 - - [25/Mar/2025 09:28:52] "[31m[1mPOST /api/settings/snidan HTTP/1.1[0m" 405 -
+2025-03-25 09:39:14,210 - werkzeug - INFO - 127.0.0.1 - - [25/Mar/2025 09:39:14] "[31m[1mPOST /api/settings/snidan HTTP/1.1[0m" 405 -
+2025-03-25 09:44:31,970 - werkzeug - INFO - 127.0.0.1 - - [25/Mar/2025 09:44:31] "[31m[1mGET /api/settings/snidan HTTP/1.1[0m" 405 -
+2025-03-25 09:44:32,043 - werkzeug - INFO - 127.0.0.1 - - [25/Mar/2025 09:44:32] "[33mGET /favicon.ico HTTP/1.1[0m" 404 -
+2025-03-25 09:45:23,560 - werkzeug - INFO - 127.0.0.1 - - [25/Mar/2025 09:45:23] "[35m[1mGET /products HTTP/1.1[0m" 500 -
+2025-03-25 09:45:23,606 - werkzeug - INFO - 127.0.0.1 - - [25/Mar/2025 09:45:23] "GET /products?__debugger__=yes&cmd=resource&f=style.css HTTP/1.1" 200 -
+2025-03-25 09:45:23,609 - werkzeug - INFO - 127.0.0.1 - - [25/Mar/2025 09:45:23] "GET /products?__debugger__=yes&cmd=resource&f=debugger.js HTTP/1.1" 200 -
+2025-03-25 09:45:23,938 - werkzeug - INFO - 127.0.0.1 - - [25/Mar/2025 09:45:23] "GET /products?__debugger__=yes&cmd=resource&f=console.png&s=teAjkxF7DAio0Q02gmBN HTTP/1.1" 200 -
+2025-03-25 09:45:24,189 - werkzeug - INFO - 127.0.0.1 - - [25/Mar/2025 09:45:24] "GET /products?__debugger__=yes&cmd=resource&f=console.png HTTP/1.1" 200 -
+2025-03-25 09:58:46,044 - snidan_monitor - INFO - Monitoring thread started
+2025-03-25 09:58:48,475 - snidan_monitor - INFO - Database not found, running setup
+2025-03-25 09:58:48,475 - snidan_monitor - INFO - Starting monitoring process
+2025-03-25 09:58:48,481 - snidan_monitor - ERROR - Snidan settings not configured
+2025-03-25 09:59:59,470 - setup - INFO - Initializing database
+2025-03-25 10:00:48,583 - setup - INFO - Default settings added
+2025-03-25 10:00:48,584 - setup - INFO - Default notification settings added
+2025-03-25 10:00:48,585 - setup - INFO - Default Snidan settings added
+2025-03-25 10:00:48,595 - setup - INFO - Database initialized successfully
+2025-03-25 10:00:48,596 - snidan_monitor - INFO - Starting Snidan Price Monitor
+2025-03-25 10:00:48,631 - werkzeug - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on http://127.0.0.1:5000
+2025-03-25 10:00:48,631 - werkzeug - INFO - [33mPress CTRL+C to quit[0m
+2025-03-25 10:07:48,867 - snidan_monitor - INFO - Monitoring thread started
+2025-03-25 10:07:52,891 - snidan_monitor - INFO - Starting monitoring process
+2025-03-25 10:07:52,895 - snidan_monitor - INFO - Database not found, running setup
+2025-03-25 10:07:52,897 - snidan_monitor - ERROR - Snidan settings not configured
+2025-03-25 10:08:00,824 - setup - INFO - Initializing database
+2025-03-25 10:08:16,123 - setup - INFO - Database initialized successfully
+2025-03-25 10:08:16,124 - snidan_monitor - INFO - Starting Snidan Price Monitor
+2025-03-25 10:08:16,170 - werkzeug - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on http://127.0.0.1:5000
+2025-03-25 10:08:16,171 - werkzeug - INFO - [33mPress CTRL+C to quit[0m
+2025-03-25 10:08:30,017 - werkzeug - INFO - 127.0.0.1 - - [25/Mar/2025 10:08:30] "OPTIONS /api/settings/snidan HTTP/1.1" 200 -
+2025-03-25 10:08:30,264 - werkzeug - INFO - 127.0.0.1 - - [25/Mar/2025 10:08:30] "[31m[1mPOST /api/settings/snidan HTTP/1.1[0m" 405 -

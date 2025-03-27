@@ -12,6 +12,8 @@ from flask_cors import CORS  # Import CORS
 # Import database
 from database import db, init_app
 
+import scraper
+
 # Load environment variables
 load_dotenv()
 
@@ -114,7 +116,6 @@ if __name__ == "__main__":
         import setup
         setup.initialize_database()
     
-    # Start the Flask app
     logger.info("Starting Snidan Price Monitor")
     app.run(debug=True, use_reloader=False)
     
@@ -124,3 +125,13 @@ if __name__ == "__main__":
         stop_event.set()
         monitoring_thread.join(timeout=5)
         logger.info("Monitoring thread stopped") 
+
+    login_info = SnidanSettings.query.first()
+    username = login_info.username
+    password = login_info.password
+    driver = scraper.setup_driver()
+    login_res = scraper.login_to_snidan(driver, username, password)
+
+    url = "https://snkrdunk.com/products/CW2288-001"
+    res = scraper.get_product_info(driver, url, username, password)
+    print(res)

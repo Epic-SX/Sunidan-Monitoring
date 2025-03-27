@@ -65,6 +65,14 @@ class SnidanSettings(db.Model):
             'password': self.password,
             'monitoring_interval': self.monitoring_interval
         }
+    
+    @classmethod
+    def create_default_settings(cls):
+        """Create default Snidan settings if they do not exist."""
+        if not cls.query.first():
+            default_settings = cls(username='default_user', password='default_pass', monitoring_interval=10)
+            db.session.add(default_settings)
+            db.session.commit()
 
 class Product(db.Model):
     """Product model"""

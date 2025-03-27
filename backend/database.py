@@ -9,8 +9,9 @@ from flask_sqlalchemy import SQLAlchemy
 # Create database directory if it doesn't exist
 os.makedirs('data', exist_ok=True)
 
-# Create SQLite database engine
-engine = create_engine('sqlite:///data/snidan_monitor.db')
+# Create SQLite database engine with absolute path
+db_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data', 'snidan_monitor.db')
+engine = create_engine(f'sqlite:///{db_path}')
 Base = declarative_base()
 Session = sessionmaker(bind=engine)
 
@@ -138,6 +139,16 @@ def init_db():
 def init_app(app):
     """Initialize the database with the Flask app"""
     db.init_app(app)
+
+def fetch_products():
+    session = Session()
+    try:
+        products = session.query(Product).all()
+        return products
+    except Exception as e:
+        print(f"Error fetching products: {e}")
+    finally:
+        session.close()
 
 if __name__ == "__main__":
     init_db() 

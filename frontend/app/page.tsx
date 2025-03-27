@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { productsApi } from './api/apiService';
+import { productsApi, systemApi } from './api/apiService';
 import { 
   Typography, 
   Grid, 
@@ -57,32 +57,21 @@ export default function Home() {
         setProducts(data);
         setError(null);
       } catch (err) {
-        console.error('Failed to fetch products:', err);
-        setError('Failed to load products. Please try again later.');
+        console.error('商品の取得に失敗しました:', err);
+        setError('製品の読み込みに失敗しました。スニダンログイン情報を確認してください。');
         // Use mock data for demonstration if API fails
-        setProducts([
-          {
-            id: 1,
-            name: 'Nike Air Jordan 1 High OG "Chicago"',
-            image_url: 'https://images.stockx.com/images/Air-Jordan-1-Retro-High-Chicago-2015-Product.jpg',
-            sizes: [
-              { size: '26.0cm', current_price: 85000, previous_price: 90000 },
-              { size: '27.0cm', current_price: 78000, previous_price: 78000 },
-            ],
-            is_active: true,
-          },
-          {
-            id: 2,
-            name: 'Nike Dunk Low "Panda"',
-            image_url: 'https://images.stockx.com/images/Nike-Dunk-Low-Retro-White-Black-Panda-2021-Product.jpg',
-            sizes: [
-              { size: '25.5cm', current_price: 22000, previous_price: 24000 },
-            ],
-            is_active: true,
-          },
-        ]);
+        setProducts([]);
       } finally {
         setLoading(false);
+      }
+      try {
+        const check_login = await systemApi.getLoginStatus();
+        if(!check_login)
+          setError("ログイン情報が正しくありません。")
+        setError(null);
+      } catch (err) {
+        console.error('商品の取得に失敗しました:', err);
+        setError("ログイン情報の確認に失敗しました。")
       }
     }
 
@@ -95,7 +84,7 @@ export default function Home() {
         await productsApi.deleteProduct(id);
         setProducts(products.filter(product => product.id !== id));
       } catch (err) {
-        console.error('Failed to delete product:', err);
+        console.error('製品の削除に失敗しました:', err);
         alert('商品の削除に失敗しました。もう一度お試しください。');
       }
     }

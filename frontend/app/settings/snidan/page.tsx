@@ -1,4 +1,6 @@
-import React from 'react';
+'use client';
+
+import React, { useState } from 'react';
 import Typography from '@mui/material/Typography';
 import Box from '@mui/material/Box';
 import TextField from '@mui/material/TextField';
@@ -15,13 +17,62 @@ import SaveIcon from '@mui/icons-material/Save';
 import Link from '@mui/material/Link';
 
 export default function SnidanSettings() {
+  const [successMessage, setSuccessMessage] = useState('');
+  const [errorMessage, setErrorMessage] = useState('');
+
+  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    const formData = new FormData(event.currentTarget);
+    
+    // Collect data as JSON instead of FormData
+    const username = formData.get('username');
+    const password = formData.get('password');
+    const monitoring_interval = formData.get('monitoring_interval');
+
+    // Validate inputs
+    if (!username || !password || !monitoring_interval) {
+      setErrorMessage('すべてのフィールドを入力してください。');
+      return; // Exit if validation fails
+    }
+
+    const data = {
+      username,
+      password,
+      monitoring_interval,
+    };
+
+    try {
+      const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
+      const response = await fetch(`${baseUrl}/api/settings/snidan`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json', // Set content type to JSON
+        },
+        body: JSON.stringify(data), // Send data as JSON
+      });
+      
+      const responseData = await response.json();
+
+      if (!response.ok) {
+        throw new Error(responseData.error || '設定の更新に失敗しました');
+      }
+
+      setSuccessMessage('設定を保存しました');
+    } catch (error) {
+      console.error('設定保存のエラー:', error);
+      setErrorMessage(error instanceof Error ? error.message : '設定の更新に失敗しました');
+    }
+  };
+
   return (
     <div>
       <Typography variant="h4" component="h1" gutterBottom>
         スニダン設定
       </Typography>
 
-      <Box component="form" noValidate>
+      <Box component="form"
+        onSubmit={handleSubmit}
+      >
         <Paper sx={{ p: 3, mb: 3 }}>
           <Typography variant="h6" gutterBottom>
             スニダンアカウント設定
@@ -124,6 +175,18 @@ export default function SnidanSettings() {
             </li>
           </ul>
         </Paper>
+
+        {successMessage && (
+          <Alert severity="success" sx={{ mb: 3 }}>
+            {successMessage}
+          </Alert>
+        )}
+
+        {errorMessage && (
+          <Alert severity="error" sx={{ mb: 3 }}>
+            {errorMessage}
+          </Alert>
+        )}
 
         <Button
           type="submit"

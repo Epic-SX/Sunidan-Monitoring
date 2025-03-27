@@ -1,0 +1,11 @@
+2025-03-25 10:03:01,989 - setup - INFO - Starting setup
+2025-03-25 10:03:01,992 - setup - INFO - Creating .env file
+2025-03-25 10:03:01,993 - setup - INFO - .env file created successfully
+2025-03-25 10:03:01,994 - setup - INFO - Initializing database
+2025-03-25 10:03:42,394 - setup - INFO - Database initialized successfully
+2025-03-25 10:03:42,396 - setup - INFO - Setup completed successfully
+2025-03-25 10:17:33,060 - setup - INFO - Starting setup
+2025-03-25 10:17:33,074 - setup - INFO - .env file already exists
+2025-03-25 10:17:33,075 - setup - INFO - Initializing database
+2025-03-25 10:20:31,802 - setup - INFO - Database initialized successfully
+2025-03-25 10:20:31,803 - setup - INFO - Setup completed successfully

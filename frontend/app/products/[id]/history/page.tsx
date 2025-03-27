@@ -70,7 +70,7 @@ export default function ProductHistory({ params }: { params: { id: string } }) {
       <Box sx={{ mb: 3 }}>
         <Button 
           component={Link} 
-          href="/products" 
+          href="/" 
           startIcon={<ArrowBackIcon />}
         >
           商品一覧に戻る

@@ -25,7 +25,7 @@ async function fetchFromAPI(endpoint: string, options: RequestInit = {}) {
 
     return await response.json();
   } catch (error) {
-    console.error('API request failed:', error);
+    console.error('APIリクエストに失敗しました:', error);
     throw error;
   }
 }
@@ -95,7 +95,7 @@ export const snidanApi = {
 // System API
 export const systemApi = {
   // Get system status
-  getStatus: () => fetchFromAPI('/system/status'),
+  getLoginStatus: () => fetchFromAPI('/system/loginstatus'),
   
   // Start/stop monitoring
   toggleMonitoring: (isActive: boolean) => 

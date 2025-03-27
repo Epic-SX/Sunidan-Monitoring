@@ -48,7 +48,6 @@ def start_monitoring(app, db, stop_event):
                     # Get active products
                     products = Product.query.filter_by(is_active=True).all()
                     logger.info(f"Monitoring {len(products)} active products")
-                    
                     for product in products:
                         if stop_event.is_set():
                             break
@@ -66,7 +65,8 @@ def start_monitoring(app, db, stop_event):
                             db.session.commit()
                             
                             # Check each size
-                            for size in product.sizes:
+                            sizes = Size.query.filter_by(product_id=product.id).all()
+                            for size in sizes:
                                 if size.size in current_prices:
                                     current_price = current_prices[size.size]
                                     
@@ -126,14 +126,14 @@ def start_monitoring(app, db, stop_event):
                     
                     # Sleep for the monitoring interval
                     logger.info(f"Sleeping for {monitoring_interval} seconds")
-                    for _ in range(monitoring_interval):
+                    for _ in range(1):
                         if stop_event.is_set():
                             break
                         time.sleep(1)
                 
                 except Exception as e:
                     logger.error(f"Error in monitoring loop: {str(e)}")
-                    time.sleep(monitoring_interval)
+                    time.sleep(1)
         
         except Exception as e:
             logger.error(f"Error in monitoring process: {str(e)}")

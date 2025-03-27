@@ -14,6 +14,7 @@ import Link from 'next/link';
 import './globals.css';
 
 // Create a custom theme
+const cardStyle = { visibility: "visible" };
 const theme = createTheme({
   palette: {
     primary: {

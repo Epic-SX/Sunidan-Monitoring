@@ -213,14 +213,14 @@ export default function Home() {
                     <Button 
                       size="small" 
                       startIcon={<EditIcon />}
-                      onClick={() => router.push(`/products/${product.id}/edit`)}
+                      onClick={() => router.push(`/products/edit/${product.id}`)}
                     >
                       編集
                     </Button>
                     <Button 
                       size="small" 
                       startIcon={<HistoryIcon />}
-                      onClick={() => router.push(`/products/${product.id}/history`)}
+                      onClick={() => router.push(`/products/history/${product.id}`)}
                     >
                       履歴
                     </Button>

@@ -40,8 +40,9 @@ import { NextResponse } from 'next/server';
 // It will proxy the request to the Flask backend
 export async function GET() {
   try {
-    const API_URL = process.env.BACKEND_URL || 'http://localhost:5000';
-    const response = await fetch(`${API_URL}/api/products`, {
+    const base_url = process.env.NEXT_PUBLIC_API_URL;
+    console.log(base_url,"==============11111111========")
+    const response = await fetch(`${base_url}/products`, {
       headers: {
         'Content-Type': 'application/json',
       },
@@ -67,8 +68,9 @@ export async function POST(request: Request) {
   try {
     const body = await request.json();
     
+    const base_url = process.env.NEXT_PUBLIC_API_URL;
     // Use the Next.js proxy to avoid CORS issues
-    const response = await fetch('http://localhost:5000/api/products/add', {
+    const response = await fetch(`${base_url}/products/add`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

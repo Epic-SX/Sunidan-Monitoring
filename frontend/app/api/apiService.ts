@@ -1,12 +1,12 @@
 'use client';
 
 // API base URL - using Next.js proxy to avoid CORS issues
-const API_BASE_URL = '/api';
-const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
+const base_url = process.env.NEXT_PUBLIC_API_URL;
 // Generic fetch function with error handling
 async function fetchFromAPI(endpoint: string, options: RequestInit = {}) {
   try {
-    const response = await fetch(`${API_BASE_URL}${endpoint}`, {
+    console.log("======", `${base_url}${endpoint}`);
+    const response = await fetch(`${base_url}${endpoint}`, {
       ...options,
       headers: {
         'Content-Type': 'application/json',

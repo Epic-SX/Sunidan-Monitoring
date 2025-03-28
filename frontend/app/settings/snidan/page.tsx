@@ -42,8 +42,8 @@ export default function SnidanSettings() {
     };
 
     try {
-      const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
-      const response = await fetch(`${baseUrl}/api/settings/snidan`, {
+      const baseUrl = process.env.NEXT_PUBLIC_API_URL;
+      const response = await fetch(`${baseUrl}/settings/snidan`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json', // Set content type to JSON

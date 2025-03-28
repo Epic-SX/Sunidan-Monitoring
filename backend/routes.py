@@ -14,89 +14,11 @@ def register_routes(app, db):
     """Register all routes with the Flask app"""
     
     # Add a route handler for OPTIONS requests to handle preflight requests
-    @app.route('/api/<path:path>', methods=['OPTIONS'])
+    @app.route('/v1/<path:path>', methods=['OPTIONS'])
     def handle_options(path):
         return '', 200
     
-    # @app.route('/api/products')
-    # def product_list():
-    #     """Product list page"""
-    #     products = Product.query.all()
-    #     return products
-    
-    # @app.route('/api/products/add', methods=['GET', 'POST'])
-    # def add_product():
-    #     """Add product page"""
-    #     if request.method == 'POST':
-    #         url = request.form.get('url')
-            
-    #         # Check if product already exists
-    #         existing_product = Product.query.filter_by(url=url).first()
-    #         if existing_product:
-    #             flash('この商品は既に追加されています', 'warning')
-    #             return redirect(url_for('product_list'))
-            
-    #         try:
-    #             # Get product info from Snidan
-    #             username = SnidanSettings.query.first().username
-    #             password = SnidanSettings.query.first().password
-    #             driver = setup_driver()
-    #             product_info = get_product_info(driver, url, username, password)
-                
-    #             if not product_info:
-    #                 flash('商品情報の取得に失敗しました。URLが正しいか、スニダンにログインしているか確認してください。', 'danger')
-    #                 return redirect(url_for('add_product'))
-                
-    #             # Create new product
-    #             product = Product(
-    #                 url=url,
-    #                 name=product_info['name'],
-    #                 image_url=product_info['image_url'],
-    #                 added_at=datetime.datetime.now(),
-    #                 is_active=True
-    #             )
-    #             db.session.add(product)
-    #             db.session.flush()  # Get product ID
-                
-    #             # Add sizes
-    #             for size_info in product_info['sizes']:
-    #                 size = Size(
-    #                     product_id=product.id,
-    #                     size=size_info['size'],
-    #                     current_price=size_info['price'],
-    #                     previous_price=size_info['price'],
-    #                     lowest_price=size_info['price'],
-    #                     highest_price=size_info['price'],
-    #                     last_updated=datetime.datetime.now()
-    #                 )
-    #                 db.session.add(size)
-                    
-    #                 # Add initial price history
-    #                 price_history = PriceHistory(
-    #                     size_id=size.id,
-    #                     price=size_info['price'],
-    #                     timestamp=datetime.datetime.now()
-    #                 )
-    #                 db.session.add(price_history)
-                
-    #             db.session.commit()
-    #             flash('商品を追加しました', 'success')
-    #             return redirect(url_for('product_list'))
-            
-    #         except Exception as e:
-    #             db.session.rollback()
-    #             flash(f'エラーが発生しました: {str(e)}', 'danger')
-    #             return redirect(url_for('add_product'))
-        
-    #     return render_template('add_product.html')
-    
-    # @app.route('/api/products/<int:product_id>')
-    # def product_detail(product_id):
-    #     """Product detail page"""
-    #     product = Product.query.get_or_404(product_id)
-    #     return render_template('product_detail.html', product=product)
-    
-    @app.route('/api/products/<int:product_id>/edit', methods=['GET'])
+    @app.route('/v1/products/<int:product_id>/edit', methods=['GET'])
     def get_edit_product(product_id):
         """Edit product page"""
         product = Product.query.get_or_404(product_id)
@@ -119,7 +41,7 @@ def register_routes(app, db):
         
         return render_template('edit_product.html', product=product)
     
-    @app.route('/api/products/<int:product_id>/edit', methods=['POST'])
+    @app.route('/v1/products/<int:product_id>/edit', methods=['POST'])
     def edit_product(product_id):
         """Edit product API endpoint"""
         product = Product.query.get_or_404(product_id)
@@ -148,7 +70,7 @@ def register_routes(app, db):
             return jsonify({'error': str(e)}), 400
     
     
-    @app.route('/api/products/<int:product_id>/delete', methods=['POST'])
+    @app.route('/v1/products/<int:product_id>/delete', methods=['POST'])
     def delete_product(product_id):
         """Delete product"""
         product = Product.query.get_or_404(product_id)
@@ -163,7 +85,7 @@ def register_routes(app, db):
         
         return redirect(url_for('product_list'))
     
-    @app.route('/api/products/<int:product_id>/history')
+    @app.route('/v1/products/<int:product_id>/history')
     def product_history(product_id):
         """Product price history page"""
         product = Product.query.get_or_404(product_id)
@@ -179,13 +101,13 @@ def register_routes(app, db):
         
         return render_template('product_history.html', product=product, history_data=json.dumps(history_data))
     
-    @app.route('/api/settings/snidan', methods=['GET'])
+    @app.route('/v1/settings/snidan', methods=['GET'])
     def get_snidan_settings():
         """Get Snidan settings page"""
         settings = SnidanSettings.query.first()
         return render_template('snidan_settings.html', settings=settings)
 
-    @app.route('/api/settings/snidan', methods=['POST'])
+    @app.route('/v1/settings/snidan', methods=['POST'])
     def update_snidan_settings():
         """Update Snidan settings page"""
         settings = SnidanSettings.query.first()
@@ -202,19 +124,19 @@ def register_routes(app, db):
             db.session.rollback()
             return jsonify({'error': str(e)}), 400
     
-    @app.route('/api/notifications')
+    @app.route('/v1/notifications')
     def notification_history():
         """Notification history page"""
         notifications = NotificationHistory.query.order_by(NotificationHistory.timestamp.desc()).limit(100).all()
         return render_template('notification_history.html', notifications=notifications)
     
-    @app.route('/api/products')
+    @app.route('/v1/products')
     def api_products():
         """API endpoint for products"""
         products = Product.query.all()
         return jsonify([product.to_dict() for product in products])
     
-    @app.route('/api/products/<int:product_id>')
+    @app.route('/v1/products/<int:product_id>')
     def api_product(product_id):
         """API endpoint for a single product"""
         try:
@@ -225,7 +147,7 @@ def register_routes(app, db):
         except Exception as e:
             return jsonify({'error': str(e)}), 500  # Handle unexpected errors gracefully
     
-    @app.route('/api/products/<int:product_id>/history')
+    @app.route('/v1/products/<int:product_id>/history')
     def api_product_history(product_id):
         """API endpoint for product price history"""
         product = Product.query.get_or_404(product_id)
@@ -237,7 +159,7 @@ def register_routes(app, db):
         
         return jsonify(history_data)
     
-    @app.route('/api/products/add', methods=['POST'])
+    @app.route('/v1/products/add', methods=['POST'])
     def api_add_product():
         """API endpoint for adding a product"""
         data = request.json
@@ -327,7 +249,7 @@ def register_routes(app, db):
             logger.error(f"Error adding product: {str(e)}")
             return jsonify({'error': str(e)}), 500
     
-    @app.route('/api/products/<int:product_id>', methods=['DELETE'])
+    @app.route('/v1/products/<int:product_id>', methods=['DELETE'])
     def api_delete_product(product_id):
         """API endpoint for deleting a product"""
         product = Product.query.get_or_404(product_id)
@@ -348,7 +270,7 @@ def register_routes(app, db):
             db.session.rollback()
             return jsonify({'error': str(e)}), 500
     
-    @app.route('/api/notifications/settings', methods=['GET'])
+    @app.route('/v1/notifications/settings', methods=['GET'])
     def get_notification_settings():
         """API endpoint for getting notification settings"""
         try:
@@ -389,7 +311,7 @@ def register_routes(app, db):
                 'chatwork_room_id': ''
             }), 500
 
-    @app.route('/api/notifications/settings', methods=['POST'])
+    @app.route('/v1/notifications/settings', methods=['POST'])
     def update_notification_settings():
         """API endpoint for updating notification settings"""
         data = request.json
@@ -416,7 +338,7 @@ def register_routes(app, db):
             db.session.rollback()
             return jsonify({'error': str(e)}), 500
     
-    @app.route('/api/snidan/settings', methods=['GET', 'POST'])
+    @app.route('/v1/snidan/settings', methods=['GET', 'POST'])
     def api_snidan_settings():
         """API endpoint for Snidan settings"""
         if request.method == 'GET':
@@ -454,13 +376,13 @@ def register_routes(app, db):
                 db.session.rollback()
                 return jsonify({'error': str(e)}), 500
     
-    @app.route('/api/notifications/history')
+    @app.route('/v1/notifications/history')
     def api_notification_history():
         """API endpoint for notification history"""
         notifications = NotificationHistory.query.order_by(NotificationHistory.timestamp.desc()).limit(100).all()
         return jsonify([notification.to_dict() for notification in notifications])
     
-    @app.route('/api/system/status')
+    @app.route('/v1/system/status')
     def api_system_status():
         """API endpoint for system status"""
         # Get last startup time
@@ -479,7 +401,7 @@ def register_routes(app, db):
             'monitoring_active': True  # This should be updated to reflect the actual status
         }) 
     
-    @app.route('/api/system/loginstatus')
+    @app.route('/v1/system/loginstatus')
     def api_system_loginstatus():
         """API endpoint for system loginstatus"""
         # Get last startup time
@@ -494,7 +416,7 @@ def register_routes(app, db):
         else:
             return jsonify({'error' : 'ログインに失敗しました。'}), 503
         
-    @app.route('/api/system/monitoring')
+    @app.route('/v1/system/monitoring')
     def api_system_toggleMonitor():
         """API endpoint for system loginstatus"""
         # Get last startup time

@@ -51,8 +51,8 @@ export function ProductEdit({ initialProduct }: ProductEditProps) {
     setIsLoading(true);
     
     try {
-      const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
-      const response = await fetch(`${baseUrl}/api/products/${product.id}/edit`, {
+      const baseUrl = process.env.NEXT_PUBLIC_API_URL;
+      const response = await fetch(`${baseUrl}/products/${product.id}/edit`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

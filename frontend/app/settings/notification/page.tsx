@@ -4,8 +4,8 @@ import { NotificationSettings, defaultSettings } from '@/types/notification';
 
 async function getNotificationSettings() {
   try {
-    const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
-    const response = await fetch(`${baseUrl}/api/notifications/settings`);
+    const baseUrl = process.env.NEXT_PUBLIC_API_URL;
+    const response = await fetch(`${baseUrl}/notifications/settings`);
 
     if (!response.ok) {
       return defaultSettings;

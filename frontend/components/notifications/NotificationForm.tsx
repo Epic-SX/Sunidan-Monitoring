@@ -33,8 +33,8 @@ export function NotificationForm({ initialSettings }: NotificationFormProps) {
     setSuccess(null);
 
     try {
-      const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
-      const response = await fetch(`${baseUrl}/api/notifications/settings`, {
+      const baseUrl = process.env.NEXT_PUBLIC_API_URL;
+      const response = await fetch(`${baseUrl}/notifications/settings`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

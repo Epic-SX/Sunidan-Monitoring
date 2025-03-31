@@ -23,12 +23,14 @@ logger = logging.getLogger("snidan_scraper")
 def setup_driver():
     """Set up and return a Chrome WebDriver instance"""
     chrome_options = Options()
-    # chrome_options.add_argument("--headless")
+    chrome_options.add_argument("--headless")
     chrome_options.add_argument("--no-sandbox")
     chrome_options.add_argument("--disable-dev-shm-usage")
     chrome_options.add_argument("--disable-gpu")
     chrome_options.add_argument("--window-size=1920,1080")
-    
+
+    chrome_options.add_argument(f"--user-data-dir=/tmp/chrome-profile-{str(hash(str(id(chrome_options))))}")
+
     service = Service(ChromeDriverManager().install())
     driver = webdriver.Chrome(service=service, options=chrome_options)
     
@@ -105,10 +107,14 @@ def login_to_snidan(driver, username, password):
         )
         password_field.send_keys(password)
         
-        # Click login button
+        # Wait for the login button to be clickable
         login_button = WebDriverWait(driver, 10).until(
             EC.element_to_be_clickable((By.XPATH, "//button[@type='submit'][contains(text(), 'ログイン')]"))
         )
+        
+        # Scroll to 150px above the button
+        driver.execute_script("window.scrollTo(0, arguments[0].getBoundingClientRect().top + window.scrollY - 150);", login_button)
+        
         login_button.click()
         
         logger.info("Successfully logged in to Snidan")

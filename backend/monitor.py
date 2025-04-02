@@ -50,6 +50,8 @@ def start_monitoring(app, db, stop_event):
                     logger.info(f"Monitoring {len(products)} active products")
                     for product in products:
                         if stop_event.is_set():
+                            if driver:
+                                driver.quit()
                             break
                         
                         try:
@@ -106,15 +108,9 @@ def start_monitoring(app, db, stop_event):
                                             notification_sent = True
                                         
                                         # Notify if price drops below threshold
-                                        elif size.notify_below and current_price <= size.notify_below and old_price > size.notify_below:
+                                        elif size.notify_below and current_price <= size.notify_below:
                                             logger.info(f"Sending notification for price below threshold: {product.name} size {size.size}")
                                             send_price_change_notification(db, product, size, old_price, current_price, "below")
-                                            notification_sent = True
-                                        
-                                        # Notify if price rises above threshold
-                                        elif size.notify_above and current_price >= size.notify_above and old_price < size.notify_above:
-                                            logger.info(f"Sending notification for price above threshold: {product.name} size {size.size}")
-                                            send_price_change_notification(db, product, size, old_price, current_price, "above")
                                             notification_sent = True
                                         
                                         if not notification_sent:

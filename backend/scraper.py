@@ -23,7 +23,7 @@ logger = logging.getLogger("snidan_scraper")
 def setup_driver():
     """Set up and return a Chrome WebDriver instance"""
     chrome_options = Options()
-    chrome_options.add_argument("--headless")
+    # chrome_options.add_argument("--headless")
     chrome_options.add_argument("--no-sandbox")
     chrome_options.add_argument("--disable-dev-shm-usage")
     chrome_options.add_argument("--disable-gpu")
@@ -46,7 +46,7 @@ def login_to_snidan(driver, username, password):
         
         # Check for and close bcIntro modal if present
         try:
-            WebDriverWait(driver, 10).until(
+            WebDriverWait(driver, 13).until(
                 EC.presence_of_element_located((By.ID, "buyee-bcFrame"))
             )
             iframe = driver.find_element(By.ID, "buyee-bcFrame")
@@ -54,7 +54,7 @@ def login_to_snidan(driver, username, password):
                 driver.switch_to.frame(iframe)
                 try:
                     close_button = WebDriverWait(driver, 7).until(
-                        EC.element_to_be_clickable((By.CLASS_NAME, "bc__closeBtn"))
+                        EC.element_to_be_clickable((By.CLASS_NAME, "bcIntro__closeBtn"))
                     )
                     close_button.click()
                     logger.info("Closed bcIntro modal")

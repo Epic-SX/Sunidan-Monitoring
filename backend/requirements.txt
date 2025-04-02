@@ -18,3 +18,4 @@ flask_cors
 sqlalchemy
 webdriver_manager
 bs4
+PyJWT==2.8.0

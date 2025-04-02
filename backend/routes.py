@@ -2,11 +2,13 @@ import os
 import datetime
 import json
 from flask import render_template, request, redirect, url_for, flash, jsonify
-from models import Product, Size, PriceHistory, NotificationHistory, Settings, NotificationSettings, SnidanSettings
+from models import Product, Size, PriceHistory, NotificationHistory, Settings, NotificationSettings, SnidanSettings, User
 from scraper import get_product_info, setup_driver
 import logging
 import scraper
 import monitor
+import bcrypt
+from auth import generate_token
 
 logger = logging.getLogger(__name__)
 
@@ -18,6 +20,19 @@ def register_routes(app, db):
     def handle_options(path):
         return '', 200
     
+    @app.route("/v1/login", methods=["POST"])
+    def login():
+        data = request.json
+        user_id = data.get("user_id")
+        password = data.get("password")
+        user = User.query.filter_by(user_id=user_id).first()
+
+        if user and password == user.password:
+            token = generate_token(user_id)
+            return jsonify({"message": "Login successful", "token": token}), 200
+        else:
+            return jsonify({"message": "Invalid credentials"}), 401
+
     @app.route('/v1/products/<int:product_id>/edit', methods=['GET'])
     def get_edit_product(product_id):
         """Edit product page"""
@@ -418,7 +433,7 @@ def register_routes(app, db):
         
     @app.route('/v1/system/monitoring')
     def api_system_toggleMonitor():
-        """API endpoint for system loginstatus"""
+        """API endpoint for system monitoring"""
         # Get last startup time
         active = request.json.active
         if active:

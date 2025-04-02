@@ -5,29 +5,60 @@ const base_url = process.env.NEXT_PUBLIC_API_URL;
 // Generic fetch function with error handling
 async function fetchFromAPI(endpoint: string, options: RequestInit = {}) {
   try {
-    console.log("======", `${base_url}${endpoint}`);
+    // Get token from localStorage
+    const token = localStorage.getItem('token');
+    
+    // Skip token check for login endpoint
+    if (endpoint === '/login') {
+      const response = await fetch(`${base_url}${endpoint}`, {
+        ...options,
+        headers: {
+          'Content-Type': 'application/json',
+          ...options.headers,
+        },
+      });
+      return handleResponse(response);
+    }
+
+    // If no token and not login endpoint, redirect to login
+    if (!token) {
+      window.location.href = '/login';
+      return;
+    }
+
     const response = await fetch(`${base_url}${endpoint}`, {
       ...options,
       headers: {
         'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`,
         ...options.headers,
       },
     });
 
-    if (!response.ok) {
-      const errorData = await response.json().catch(() => ({}));
-      // Create a custom error with the error data
-      const error: any = new Error(errorData.error || errorData.message || `API error: ${response.status}`);
-      error.data = errorData;
-      error.status = response.status;
-      throw error;
+    // Handle 401 Unauthorized response
+    if (response.status === 401) {
+      localStorage.removeItem('token');
+      window.location.href = '/login';
+      return;
     }
 
-    return await response.json();
+    return handleResponse(response);
   } catch (error) {
     console.error('APIリクエストに失敗しました:', error);
     throw error;
   }
+}
+
+// Helper function to handle response
+async function handleResponse(response: Response) {
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({}));
+    const error: any = new Error(errorData.error || errorData.message || `API error: ${response.status}`);
+    error.data = errorData;
+    error.status = response.status;
+    throw error;
+  }
+  return await response.json();
 }
 
 // Products API
@@ -94,6 +125,12 @@ export const snidanApi = {
 
 // System API
 export const systemApi = {
+  // Login
+  login: (user_id: string, password: string) => fetchFromAPI('/login', {
+    method: 'POST',
+    body: JSON.stringify({ user_id, password }),
+  }),
+
   // Get system status
   getLoginStatus: () => fetchFromAPI('/system/loginstatus'),
   

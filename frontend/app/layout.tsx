@@ -12,6 +12,7 @@ import Container from '@mui/material/Container';
 import Button from '@mui/material/Button';
 import Link from 'next/link';
 import './globals.css';
+import { usePathname } from 'next/navigation';
 
 // Create a custom theme
 const cardStyle = { visibility: "visible" };
@@ -72,6 +73,9 @@ export default function RootLayout({
 }: {
   children: React.ReactNode
 }) {
+  const pathname = usePathname();
+  const isLoginPage = pathname === '/login';
+
   // This effect runs only on the client side and helps with hydration issues
   useEffect(() => {
     // Remove any browser-added attributes that might cause hydration mismatches
@@ -92,7 +96,7 @@ export default function RootLayout({
           <ThemeProvider theme={theme}>
             <CssBaseline />
             <Box sx={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
-              <AppBar position="static" color="primary" elevation={0}>
+              <AppBar position="static" color="primary" sx={{ display: isLoginPage ? 'none' : 'block' }} elevation={0}>
                 <Toolbar>
                   <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
                     スニダン価格監視

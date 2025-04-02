@@ -67,3 +67,23 @@ a {
 .loading-pulse {
   animation: pulse 1.5s infinite ease-in-out;
 } 
+
+.login-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 70vh;
+  width: 100vw;
+}
+
+.input-field {
+  margin-bottom: 16px;
+  width: 300px;
+}
+
+.login-button {
+  margin-top: 15px !important;
+  width: 100%;
+}
+

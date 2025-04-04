@@ -111,7 +111,7 @@ export function NotificationForm({ initialSettings }: NotificationFormProps) {
             />
             </Paper>
 
-            <Paper sx={{ p: 3, mb: 3 }}>
+            <Paper sx={{ p: 3, mb: 3,display: 'none' }}>
             <Typography variant="h6" gutterBottom>
             LINE通知設定
             </Typography>
@@ -155,7 +155,7 @@ export function NotificationForm({ initialSettings }: NotificationFormProps) {
         </Paper>
 
         {/* Chatwork Notification Settings */}
-        <Paper sx={{ p: 3, mb: 3 }}>
+        <Paper sx={{ p: 3, mb: 3,display: 'none' }}>
           <Typography variant="h6" gutterBottom>
             Chatwork通知設定
           </Typography>
@@ -227,7 +227,7 @@ export function NotificationForm({ initialSettings }: NotificationFormProps) {
             </AccordionDetails>
           </Accordion>
 
-          <Accordion>
+          <Accordion sx={{ display: 'none' }}>
             <AccordionSummary expandIcon={<ExpandMoreIcon />}>
               <Typography>Chatwork通知の設定方法</Typography>
             </AccordionSummary>

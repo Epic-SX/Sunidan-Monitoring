@@ -258,62 +258,54 @@ def get_current_prices(driver, product):
     """Get current prices for a product"""
     try:
         logger.info(f"Getting current prices for product: {product.name}")
+        # Convert URL to Snidan API format
+        url = product.url.replace('products', 'v1/sneakers') + "/size/list"
         
-        driver.get(product.url)
-
-        try:
-            close_button2 = WebDriverWait(driver, 3).until(
-                EC.element_to_be_clickable((By.CLASS_NAME, "fc-cta-consent"))
-            )
-            close_button2.click()
-            logger.info("Closed fc-consent-root modal")
-        except Exception as e:
-            logger.warning(f"Error closing fc-consent-root modal: {str(e)}")
-        
-        size_link = WebDriverWait(driver, 10).until(
-            EC.element_to_be_clickable((By.CSS_SELECTOR, "a.new-buy-button"))
-        )
-        size_link.click()
-        
-        # Attempt to extract size and price information
-        size_elements = []
-        for attempt in range(3):  # Retry up to 3 times
-            try:
-                size_elements = driver.find_elements(By.CSS_SELECTOR, "ul.buy-size-select-box li.list")
-                if size_elements:  # Break if elements are found
-                    break
-            except Exception as e:
-                logger.warning(f"Attempt {attempt + 1}: Error finding size elements: {str(e)}")
-                time.sleep(1)
-        
-        # Use a list comprehension to build the size_prices dictionary
-        size_prices = {
-            WebDriverWait(element, 10).until(
-                EC.presence_of_element_located((By.CSS_SELECTOR, ".size-num .num"))
-            ).text.strip(): int(
-                WebDriverWait(element, 10).until(
-                    EC.presence_of_element_located((By.CSS_SELECTOR, ".size-price"))
-                ).text.strip().replace('¥', '').replace(',', '').strip()
-            )
-            for element in size_elements
-            if (
-                WebDriverWait(element, 10).until(
-                    EC.presence_of_element_located((By.CSS_SELECTOR, ".size-price"))
-                ).text.strip().replace('¥', '').replace(',', '').strip().isdigit()
-            )
+        # Make request to Snidan API with browser-like headers
+        headers = {
+            'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7',
+            'accept-language': 'en-US,en;q=0.9',
+            'cache-control': 'max-age=0',
+            'sec-ch-ua': '"Chromium";v="134", "Not:A-Brand";v="24", "Google Chrome";v="134"',
+            'sec-ch-ua-mobile': '?0',
+            'sec-ch-ua-platform': '"Windows"',
+            'sec-fetch-dest': 'document',
+            'sec-fetch-mode': 'navigate',
+            'sec-fetch-site': 'none',
+            'sec-fetch-user': '?1',
+            'upgrade-insecure-requests': '1',
+            'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/134.0.0.0 Safari/537.36'
         }
+        
+        response = requests.get(url, headers=headers)
+        
+        if response.status_code != 200:
+            logger.error(f"Failed to get size list. Status code: {response.status_code}")
+            return None
 
-        if size_prices:  # Only return if size_prices has data
-            logger.info(f"Extracted size and price information: {size_prices}")
+        data = response.json()
+        if not data or 'data' not in data or 'minPriceOfSizeList' not in data['data']:
+            logger.error("Invalid response format")
+            return None
+
+        # Process the minPriceOfSizeList into a dictionary
+        size_prices = {}
+        for item in data['data']['minPriceOfSizeList']:
+            if item['price'] > 0:  # Only include sizes with prices
+                # Calculate size using the formula
+                calculated_size = 20 + (item['size'] - 12) * 0.5
+                size_str = f"{calculated_size:.1f}"
+                if size_str.endswith('.0'):
+                    size_str = size_str[:-2]
+                size_prices[f"{size_str}cm"] = item['price']
+
+        if size_prices:
             logger.info(f"Successfully retrieved current prices for {len(size_prices)} sizes")
-            return size_prices  # Return populated size_prices
+            return size_prices
         
         logger.warning("No prices were extracted for the product.")
-        return None  # Return None if no prices were found
+        return None
 
-    except TimeoutException:
-        logger.error("Timeout while getting current prices")
     except Exception as e:
         logger.error(f"Error getting current prices: {str(e)}")
-    
-    return None  # Return None if an error occurred
+        return None
